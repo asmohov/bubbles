@@ -13,7 +13,7 @@ dcycle     = 50      # time increment between outputs
 <output2>
 file_type  = vtk       # Binary data dump
 variable   = prim      # variables to be output
-dt         = 0.0002      # time increment between outputs
+dt         = 0.00002      # time increment between outputs
 
 <time>
 cfl_number = 0.3       # The Courant, Friedrichs, & Lewy (CFL) Number
@@ -36,9 +36,9 @@ x2max      = 1      # maximum value of X2
 ix2_bc     = reflecting  # inner-X2 boundary flag
 ox2_bc     = reflecting  # outer-X2 boundary flag
 
-nx3        = 64      # Number of zones in X3-direction
+nx3        = 32      # Number of zones in X3-direction
 x3min      = 0      # minimum value of X3
-x3max      = 4       # maximum value of X3
+x3max      = 2       # maximum value of X3
 ix3_bc     = user      # inner-X3 boundary flag 
 ox3_bc     = user      # outer-X3 boundary flag
 
@@ -49,7 +49,7 @@ grav_acc3  = -1
 
 <problem>
 wave_flag = 0
-g_const = .1
+g_const = 1
 iprob = 3
 amp   = 0.000
 drat  = 1.0
@@ -62,6 +62,6 @@ y0_sph = 0
 z0_sph = 1
 orient_sph = 1
 alpha_sph = 9.0 #radius is 4.493/alpha_sph
-beta_in = 1
+beta_in = .1
 beta_out = 10
 
