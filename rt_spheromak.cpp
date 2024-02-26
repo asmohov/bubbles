@@ -103,6 +103,10 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   Real kx = 2.0*(PI)/(pmy_mesh->mesh_size.x1max - pmy_mesh->mesh_size.x1min);
   Real ky = 2.0*(PI)/(pmy_mesh->mesh_size.x2max - pmy_mesh->mesh_size.x2min);
   Real kz = 2.0*(PI)/(pmy_mesh->mesh_size.x3max - pmy_mesh->mesh_size.x3min);
+  
+
+  std::cout<<"mesh_size_x1max-x1min"<<pmy_mesh->mesh_size.x1max - pmy_mesh->mesh_size.x1min<<std::endl;
+  std::cout<<"kx"<<kx<<std::endl;
 
   // Read perturbation amplitude, problem switch, density ratio
   Real amp = pin->GetReal("problem","amp");
@@ -205,12 +209,12 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
           //if (pcoord->x3v(k) > 0.0) den *= drat;
 
           //if (iprob == 1) {
-            //phydro->u(IM3,k,j,i) = (1.0 + std::cos(kx*(pcoord->x1v(i))))/8.0
-             //                      *(1.0 + std::cos(ky*pcoord->x2v(j)))
-              //                     *(1.0 + std::cos(kz*pcoord->x3v(k)));
+             //phydro->u(IM3,k,j,i) = (1.0 + std::cos(kx*(pcoord->x1v(i))))/8.0
+               //                    *(1.0 + std::cos(ky*pcoord->x2v(j)))
+               //                    *(1.0 + std::cos(kz*pcoord->x3v(k)));
           //} else {
             //phydro->u(IM3,k,j,i) = amp*(ran2(&iseed) - 0.5)*(
-             //   1.0 + std::cos(kz*pcoord->x3v(k)));
+                //1.0 + std::cos(kz*pcoord->x3v(k)));
           //}
 
           //phydro->u(IDN,k,j,i) = den;
@@ -218,8 +222,8 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
           //phydro->u(IM2,k,j,i) = 0.0;
           //phydro->u(IM3,k,j,i) *= (den*amp);
           //if (NON_BAROTROPIC_EOS) {
-            //phydro->u(IEN,k,j,i) = (1.0/gamma + grav_acc*den*(pcoord->x3v(k)))/gm1;
-            //phydro->u(IEN,k,j,i) += 0.5*SQR(phydro->u(IM3,k,j,i))/den;
+          //  phydro->u(IEN,k,j,i) = (1.0/gamma + grav_acc*den*(pcoord->x3v(k)))/gm1;
+          //  phydro->u(IEN,k,j,i) += 0.5*SQR(phydro->u(IM3,k,j,i))/den;
           //}
         //}
       //}
@@ -317,15 +321,15 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
         for (int j=js; j<=je; j++) {
           for (int i=is; i<=ie; i++) {
 		  //Bz
-            Real x1 = pcoord->x1f(i);
-            Real y1 = pcoord->x2f(j);
-            Real z1 = pcoord->x3f(k);
+            Real x1 = pcoord->x1v(i);
+            Real y1 = pcoord->x2v(j);
+            Real z1 = pcoord->x3v(k);
             //adjust relative to spheromak center
             Real x=x1-x0;
             Real y=y1-y0;
             Real z=z1-z0+1e-15;
 	    Real r0 = 4.493/Alpha; //define r0 in terms of Alpha
-            //std::cout<<"spheromake radius is "<<r0<<std::endl;
+            std::cout<<"spheromake radius is "<<r0<<std::endl;
 	    //ORIENTATION 0=z, 1=x, 2=y
             if(orient_sph==1){Real z_temp=z;z=x;x=z_temp;y=z_temp;}
 	    //check if inside our outside spheromak
@@ -334,7 +338,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
                  Real Bz_int = b0*((x*x+y*y-2*z*z)*std::cos(r*Alpha)/(r*r*r*r) + 
 	              (2*z*z+x*x*x*x*Alpha*Alpha+y*y*y*y*Alpha*Alpha+y*y*(-1+z*z*Alpha*Alpha)+x*x*(-1+2*y*y*Alpha*Alpha+z*z*Alpha*Alpha))*std::sin(r*Alpha)/(Alpha*r*r*r*r*r));
 		 //catch 0,0,0 case
-		 if(r<1e-5){Bz_int = b0*(2/3)*Alpha;}
+		 if(r<1e-5){Bz_int = b0*(2/3)*Alpha*Alpha;}
 		 //pfield->b.x3f(k,j,i)=Bz_int;
 		 //assign according to orientation of spheromak
                  if(orient_sph==0){pfield->b.x3f(k,j,i)=Bz_int;}
@@ -368,9 +372,9 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 
     //initialize density (cell centered)
     grav_acc = phydro->hsrc.GetG3();
-    for (int k=ks; k<=ke+1; k++) {
-      for (int j=js; j<=je+1; j++) {
-        for (int i=is; i<=ie+1; i++) {
+    for (int k=ks; k<=ke; k++) {
+      for (int j=js; j<=je; j++) {
+        for (int i=is; i<=ie; i++) {
           Real azero= pcoord->x3v(ke);//set exponential coefficient to z length of box
           //define x y and z
           Real x1 = pcoord->x1v(i);
@@ -384,7 +388,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 	  Real r0 = 4.493/Alpha;
 	  Real den;
 	  if (std::sqrt(x*x+y*y+z*z)<r0){//inside bubble
-	  den=(1.451*1.4451*b0*b0*.5/beta_in);}//set using B at theta=pi/2,r=r0
+	  den=(1.451*1.4451*b0*b0*.5*beta_in);}//set using B at theta=pi/2,r=r0
 	  else{den=azero*std::exp(grav_acc*z1);}//outside bubble
           //std::cout<< "attempting to set exponential density: " << den <<std::endl;
           if (pcoord->x3v(k) > 0.0) den *= drat;

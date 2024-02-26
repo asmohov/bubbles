@@ -27,8 +27,8 @@ start = time.time()
 z=[]
 fig, ax = plt.subplots(figsize=(20,20))
 Cam = cam(fig)
-outrange = range(301)
-file_path = '../rt_clean'
+outrange = range(90)
+file_path = '../mag_bubble'
 for i in outrange:
         if z != []:
             z.remove()
@@ -50,28 +50,28 @@ for i in outrange:
         z_coords = data[2][:-1]
         y_coords = data[1][:-1]#+.03125
         #print(x_coords)
-        #splice = np.array(data[3]['Bcc'])
+        splice = np.array(data[3]['Bcc'])
         #print(splice.shape)
-        #splice = splice[:,16,:,:]
+        splice = splice[:,16,:,:]
 
         rho_splice = np.array(data[3]['rho'])
         rho_splice = rho_splice[:,:,16]
         #print(rho_splice.shape)
         #print(len(x_coords))
         #print(len(z_coords))
-        #Bx = splice[:,:,0]
-        #By = splice[:,:,1]
-        #Bz = splice[:,:,2]
+        Bx = splice[:,:,0]
+        By = splice[:,:,1]
+        Bz = splice[:,:,2]
         #print('len bx ',len(Bx))
         #print('len bz ',len(Bz))
         #print('len by ',len(By))
-        #Bmag = np.sqrt(Bx*Bx+By*By+Bz*Bz)
+        Bmag = np.sqrt(Bx*Bx+By*By+Bz*Bz)
 
         #fig, ax = plt.subplots(figsize=(8,8))
-        ax.set_xlim(-.05,.05)
-        ax.set_ylim(-.1,.1)
+        ax.set_xlim(-1,1)
+        ax.set_ylim(0,4)
         ax.pcolormesh(x_coords,z_coords,rho_splice,shading='gouraud',cmap='plasma')
-        #q = ax.quiver(x_coords,z_coords,Bx,Bz,Bmag,cmap='plasma')
+        q = ax.quiver(x_coords,z_coords,Bx,Bz,Bmag,cmap='plasma')
         if i%1== 0:
             #print('snapping')
             Cam.snap()

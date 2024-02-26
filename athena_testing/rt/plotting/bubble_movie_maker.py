@@ -27,7 +27,7 @@ start = time.time()
 z=[]
 fig, ax = plt.subplots(figsize=(20,20))
 Cam = cam(fig)
-outrange = range(175)
+outrange = range(90)
 file_path = '../mag_bubble'
 for i in outrange:
         if z != []:
@@ -69,17 +69,17 @@ for i in outrange:
 
         #fig, ax = plt.subplots(figsize=(8,8))
         ax.set_xlim(-1,1)
-        ax.set_ylim(0,2)
+        ax.set_ylim(0,4)
         ax.pcolormesh(x_coords,z_coords,rho_splice,shading='gouraud',cmap='plasma')
         q = ax.quiver(x_coords,z_coords,Bx,Bz,Bmag,cmap='plasma')
         if i%1== 0:
             #print('snapping')
             Cam.snap()
 print('Beginning animation')
-anim = Cam.animate(blit=False,interval=100)
+anim = Cam.animate(blit=False,interval=50)
 #writervideo = anim.FFMpegWriter(fps=60)
 print('done animating')
-anim.save('mag_bubble_test.mp4')
+anim.save('rt_test.mp4')
 #Video("bubble_test.mp4",embed=True)
 print('Run time is ',(time.time()-start),' seconds' )
 #play video inline
