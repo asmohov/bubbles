@@ -25,9 +25,9 @@ import IPython
 from base64 import b64encode
 start = time.time()
 z=[]
-fig, ax = plt.subplots(figsize=(20,20))
+fig, ax = plt.subplots(figsize=(10,20))
 Cam = cam(fig)
-outrange = range(90)
+outrange = range(42)
 file_path = '../mag_bubble'
 for i in outrange:
         if z != []:
@@ -52,10 +52,10 @@ for i in outrange:
         #print(x_coords)
         splice = np.array(data[3]['Bcc'])
         #print(splice.shape)
-        splice = splice[:,16,:,:]
+        splice = splice[:,32,:,:]
 
         rho_splice = np.array(data[3]['rho'])
-        rho_splice = rho_splice[:,:,16]
+        rho_splice = rho_splice[:,:,32]
         #print(rho_splice.shape)
         #print(len(x_coords))
         #print(len(z_coords))
@@ -79,7 +79,7 @@ print('Beginning animation')
 anim = Cam.animate(blit=False,interval=50)
 #writervideo = anim.FFMpegWriter(fps=60)
 print('done animating')
-anim.save('rt_test.mp4')
+anim.save('27feb_test.mp4')
 #Video("bubble_test.mp4",embed=True)
 print('Run time is ',(time.time()-start),' seconds' )
 #play video inline
