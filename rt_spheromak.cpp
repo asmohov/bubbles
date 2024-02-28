@@ -105,8 +105,8 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   Real kz = 2.0*(PI)/(pmy_mesh->mesh_size.x3max - pmy_mesh->mesh_size.x3min);
   
 
-  std::cout<<"mesh_size_x1max-x1min"<<pmy_mesh->mesh_size.x1max - pmy_mesh->mesh_size.x1min<<std::endl;
-  std::cout<<"kx"<<kx<<std::endl;
+  //std::cout<<"mesh_size_x1max-x1min"<<pmy_mesh->mesh_size.x1max - pmy_mesh->mesh_size.x1min<<std::endl;
+  //std::cout<<"kx"<<kx<<std::endl;
 
   // Read perturbation amplitude, problem switch, density ratio
   Real amp = pin->GetReal("problem","amp");
@@ -123,7 +123,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   Real beta_in = pin->GetReal("problem","beta_in");
   //set b0 from density at top of box and beta_out
   Real azero= pcoord->x3v(ke);//set exponential coefficient to z length of box
-  Real rho_top = azero*std::exp(grav_acc*azero); //define rho_max as the density at the top of the box
+  Real rho_top = azero*std::exp(grav_acc*(z0+(4.49/Alpha))); //define rho_max as the density at the top of the box
   Real b0 = std::sqrt(2*(rho_top/beta_out));
   // 2D PROBLEM ---------------------------------------------------------------
 
@@ -249,7 +249,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 	    //adjust relative to spheromak center
 	    Real x=x1-x0;
 	    Real y=y1-y0;
-	    Real z=z1-z0+1e-15;//catch 0 case
+	    Real z=z1-z0;//catch 0 case
 	    Real r0 = 4.493/Alpha; //define r0 in terms of Alpha
 	    //check if inside our outside spheromak
 	    Real r=std::sqrt(x*x+y*y+z*z);
@@ -258,6 +258,15 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
                 Real Bx_int=(1/(Alpha*r*r*r*r*r))*(z*Alpha*(-3*x*r+Alpha*x*x*y*r/(std::sqrt(z*z))+y*Alpha*(y*y+z*z)*r/(std::sqrt(z*z)))*std::cos(r*Alpha) -
                            z*(y*r*Alpha*r/(std::sqrt(z*z))+x*x*x*Alpha*Alpha+x*(-3+y*y*Alpha*Alpha+Alpha*Alpha*z*z))*std::sin(r*Alpha));
 		Bx_int = b0*Bx_int;
+		//catch small r case
+		if (std::abs(z)<0.1*r0){
+		   Real theta = std::acos(z/r);//taylor expand arccos(z/r)
+                   Real phi = std::acos(x/std::sqrt(x*x+y*y));
+		   Bx_int = (1.0/15)*r*Alpha*std::sin(theta)*(r*Alpha*std::cos(theta)*std::cos(phi)-5*std::sin(phi));
+		   Bx_int = b0*Bx_int;}
+		if ((x*x+y*y)==0){Bx_int=0;}//catch 0 0 z case
+		   
+		   
 		//assign according to orientation of spheromak
 		if(orient_sph==0){pfield->b.x1f(k,j,i)=Bx_int;}
                 if(orient_sph==1){pfield->b.x3f(k,j,i)=Bx_int;}//swap Bx and Bz for this case
@@ -288,7 +297,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
             //adjust relative to spheromak center
             Real x=x1-x0;
             Real y=y1-y0;
-            Real z=z1-z0+1e-15;
+            Real z=z1-z0;
 	    Real r0 = 4.493/Alpha; //define r0 in terms of Alpha
             //check if inside our outside spheromak
             Real r=std::sqrt(x*x+y*y+z*z);
@@ -296,6 +305,14 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
                 Real By_int=(1/(Alpha*r*r*r*r*r))*(z*Alpha*(-3*y*r+Alpha*y*y*x*r/(std::sqrt(z*z))+x*Alpha*(x*x+z*z)*r/(std::sqrt(z*z)))*std::cos(r*Alpha) -
                            z*(x*r*Alpha*r/(std::sqrt(z*z))+y*y*y*Alpha*Alpha+y*(-3+x*x*Alpha*Alpha+Alpha*Alpha*z*z))*std::sin(r*Alpha));
 		By_int=b0*By_int;
+		//catch small r case
+		if (std::abs(z)<0.1*r0){
+                   Real theta = std::acos(z/r);
+                   Real phi = std::acos(x/std::sqrt(x*x+y*y));
+                   By_int = (1.0/15)*r*Alpha*std::sin(theta)*(5*std::cos(phi)+r*Alpha*std::cos(theta)*std::sin(phi));
+                   By_int = b0*By_int;}
+		if ((x*x+y*y)<0.01*r0){By_int=0.0;}
+		//std::cout<<"inside spheromak radius By_int is"<<By_int<<std::endl;
 		//assign according to orientation of spheromak
                 if(orient_sph==0){pfield->b.x2f(k,j,i)=By_int;}
                 if(orient_sph==1){pfield->b.x2f(k,j,i)=By_int;}
@@ -321,15 +338,15 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
         for (int j=js; j<=je; j++) {
           for (int i=is; i<=ie; i++) {
 		  //Bz
-            Real x1 = pcoord->x1v(i);
-            Real y1 = pcoord->x2v(j);
-            Real z1 = pcoord->x3v(k);
+            Real x1 = pcoord->x1f(i);
+            Real y1 = pcoord->x2f(j);
+            Real z1 = pcoord->x3f(k);
             //adjust relative to spheromak center
             Real x=x1-x0;
             Real y=y1-y0;
-            Real z=z1-z0+1e-15;
+            Real z=z1-z0;
 	    Real r0 = 4.493/Alpha; //define r0 in terms of Alpha
-            std::cout<<"spheromake radius is "<<r0<<std::endl;
+            //std::cout<<"spheromak radius is "<<r0<<std::endl;
 	    //ORIENTATION 0=z, 1=x, 2=y
             if(orient_sph==1){Real z_temp=z;z=x;x=z_temp;y=z_temp;}
 	    //check if inside our outside spheromak
@@ -338,10 +355,23 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
                  Real Bz_int = b0*((x*x+y*y-2*z*z)*std::cos(r*Alpha)/(r*r*r*r) + 
 	              (2*z*z+x*x*x*x*Alpha*Alpha+y*y*y*y*Alpha*Alpha+y*y*(-1+z*z*Alpha*Alpha)+x*x*(-1+2*y*y*Alpha*Alpha+z*z*Alpha*Alpha))*std::sin(r*Alpha)/(Alpha*r*r*r*r*r));
 		 //catch 0,0,0 case
-		 if(r<1e-5){Bz_int = b0*(2/3)*Alpha*Alpha;}
+                //if (std::abs(z)<0.2*r0){
+                //   Real theta = std::acos(z/r);
+                //   Real phi = std::acos(x/(x*x+y*y));
+                //   Real Bz_int = (1.0/30)*(20-3*r*r*Alpha*Alpha*Alpha+r*r*Alpha*Alpha*std::cos(2*theta));
+                //   Bz_int = b0*Bz_int;}
+		   //std::cout<<"inside inner spheromak radius Bz is"<<Bz_int<<std::endl;}
 		 //pfield->b.x3f(k,j,i)=Bz_int;
 		 //assign according to orientation of spheromak
-                 if(orient_sph==0){pfield->b.x3f(k,j,i)=Bz_int;}
+		 //catch 0 0 0 case
+		 if (r<.1*r0){Real Bz_int=b0*(2.0/3)*Alpha*Alpha;
+		 std::cout<<"inside spheromak radius Bz is"<<Bz_int<<std::endl;
+		 }
+		 if(std::isnan(Bz_int)){std::cout<<"x y z at nan is "<<x1<<' '<<y1<<' '<<z1<<std::endl;
+		   Bz_int=b0*(2.0/3)*Alpha*Alpha;}
+                 if(std::isnan(Bz_int)){std::cout<<"x y z at nan is "<<x1<<' '<<y1<<' '<<z1<<std::endl;}
+                 
+	         if(orient_sph==0){pfield->b.x3f(k,j,i)=Bz_int;}
                  if(orient_sph==1){pfield->b.x1f(k,j,i)=Bz_int;}//swap Bx and Bz for this case
                  if(orient_sph==2){pfield->b.x2f(k,j,i)=Bz_int;}//swap By and Bz for this case
 		 //std::cout<<"inside spheromak radius Bz is"<<Bz_int<<std::endl;
