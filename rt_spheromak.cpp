@@ -251,6 +251,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 	    Real y=y1-y0;
 	    Real z=z1-z0;//catch 0 case
 	    Real r0 = 4.493/Alpha; //define r0 in terms of Alpha
+	    if(orient_sph==1){Real z_temp=z;z=x;x=z_temp;}
 	    //check if inside our outside spheromak
 	    Real r=std::sqrt(x*x+y*y+z*z);
 	    if (r<r0){//internal Bx
@@ -300,6 +301,8 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
             Real z=z1-z0;
 	    Real r0 = 4.493/Alpha; //define r0 in terms of Alpha
             //check if inside our outside spheromak
+	    //ORIENTATION
+	    if(orient_sph==1){Real z_temp=z;z=x;x=z_temp;}
             Real r=std::sqrt(x*x+y*y+z*z);
             if (r<r0){//internal By
                 Real By_int=(1/(Alpha*r*r*r*r*r))*(z*Alpha*(-3*y*r+Alpha*y*y*x*r/(std::sqrt(z*z))+x*Alpha*(x*x+z*z)*r/(std::sqrt(z*z)))*std::cos(r*Alpha) -
@@ -348,7 +351,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 	    Real r0 = 4.493/Alpha; //define r0 in terms of Alpha
             //std::cout<<"spheromak radius is "<<r0<<std::endl;
 	    //ORIENTATION 0=z, 1=x, 2=y
-            if(orient_sph==1){Real z_temp=z;z=x;x=z_temp;y=z_temp;}
+            if(orient_sph==1){Real z_temp=z;z=x;x=z_temp;}
 	    //check if inside our outside spheromak
             Real r=std::sqrt(x*x+y*y+z*z);
             if (r<r0){//internal Bz
@@ -364,7 +367,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 		 //pfield->b.x3f(k,j,i)=Bz_int;
 		 //assign according to orientation of spheromak
 		 //catch 0 0 0 case
-		 if (r<.1*r0){Real Bz_int=b0*(2.0/3)*Alpha*Alpha;
+		 if (r<.05*r0){Real Bz_int=b0*(2.0/3)*Alpha*Alpha;
 		 std::cout<<"inside spheromak radius Bz is"<<Bz_int<<std::endl;
 		 }
 		 if(std::isnan(Bz_int)){std::cout<<"x y z at nan is "<<x1<<' '<<y1<<' '<<z1<<std::endl;

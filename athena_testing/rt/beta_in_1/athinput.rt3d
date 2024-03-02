@@ -1,0 +1,68 @@
+<comment>
+problem   = Rayleigh-Taylor instability
+reference = Liska, R., & Wendroff, B., SIAM J. Sci. Comput., 25, 995-1017 (2003)
+configure = --prob=rt
+
+<job>
+problem_id = rt        # problem ID: basename of output filenames
+
+<output1>
+file_type  = hst       # History data dump
+dcycle     = 10      # time increment between outputs
+
+<output2>
+file_type  = vtk       # Binary data dump
+variable   = prim      # variables to be output
+dt         = 0.002      # time increment between outputs
+
+<time>
+cfl_number = 0.4       # The Courant, Friedrichs, & Lewy (CFL) Number
+nlim       = -1        # cycle limitA
+tlim       = 15.0       # time limit
+integrator  = rk3       # time integration algorithm
+xorder      = 2         # order of spatial reconstruction
+ncycle_out  = 10         # interval for stdout summary info
+dt_diagnostics = 0      #run dt diagnostics
+
+<mesh>
+nx1        = 32        # Number of zones in X1-direction
+x1min      = -1     # minimum value of X1
+x1max      = 1      # maximum value of X1
+ix1_bc     = reflecting  # inner-X1 boundary flag
+ox1_bc     = reflecting  # outer-X1 boundary flag
+
+nx2        = 32        # Number of zones in X2-direction
+x2min      = -1     # minimum value of X2
+x2max      = 1      # maximum value of X2
+ix2_bc     = reflecting  # inner-X2 boundary flag
+ox2_bc     = reflecting  # outer-X2 boundary flag
+
+nx3        = 64      # Number of zones in X3-direction
+x3min      = 0      # minimum value of X3
+x3max      = 4       # maximum value of X3
+ix3_bc     = user      # inner-X3 boundary flag 
+ox3_bc     = user      # outer-X3 boundary flag
+
+<hydro>
+iso_sound_speed = 1.0 
+gamma      = 1.66666667 # gamma = C_p/C_v
+grav_acc3  = -1
+
+<problem>
+wave_flag = 0
+g_const = 1
+iprob = 3
+amp   = 0.000
+drat  = 1.0
+b0    = .01
+angle = 90
+#spheromak parameters
+rad_sph = 1
+x0_sph = 0
+y0_sph = 0
+z0_sph = 1
+orient_sph = 1
+alpha_sph = 9.0 #radius is 4.493/alpha_sph
+beta_in = 1
+beta_out = 100
+
